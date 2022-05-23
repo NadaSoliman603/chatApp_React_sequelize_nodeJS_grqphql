@@ -10,6 +10,9 @@ module.exports = gql`
     imageUrl: String
     latestMessage: Message
   }
+  
+ 
+
 
   type Message {
     uuid: String!
@@ -17,6 +20,10 @@ module.exports = gql`
     from: String!
     to: String!
     createdAt: String!
+  }
+
+  type Messages{
+    messages : [Message]!
   }
 
   type Query {
