@@ -22,10 +22,6 @@ module.exports = gql`
     createdAt: String!
   }
 
-  type Messages{
-    messages : [Message]!
-  }
-
   type Query {
     getUsers: [User]!
     login(username: String!, password: String!): User!
