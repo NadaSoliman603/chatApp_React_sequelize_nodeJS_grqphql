@@ -9,7 +9,7 @@ function Header({ history }) {
 
     const logout = () => {
       dispatch({ type: 'LOGOUT' })
-      history.push('/login')
+      window.location.href ="./login"
     }
     return (
         <Navbar bg="light" expand="lg">

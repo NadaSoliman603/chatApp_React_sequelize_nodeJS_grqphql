@@ -38,8 +38,14 @@ export default function Register(props) {
   }
 
   return (
-    <Row className="bg-white py-5 justify-content-center">
-      <Col sm={8} md={6} lg={4}>
+    <Row className=" justify-content-center " style={{
+      height:"577px",
+      alignItems: "center"
+    }}>
+      <Col sm={8} md={6} lg={4} className="bg-white p-5"  style={{
+            height: "392px",
+            borderRadius: "14px"
+      }}>
         <h1 className="text-center">Login</h1>
         <Form onSubmit={submitLoginForm}>
           <Form.Group>

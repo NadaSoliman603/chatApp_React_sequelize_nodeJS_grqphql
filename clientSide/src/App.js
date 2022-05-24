@@ -18,13 +18,15 @@ function App() {
       <AuthProvider>
         <MessageProvider>
           <BrowserRouter>
-            <Container className="pt-5">
+          <div style={{background:"rgb(0 0 0 / 80%)" , height:"625px"}}>
+            <Container className="pt-5 " >
               <Switch>
                 <DynamicRoute exact path="/" component={Home} authenticated />
                 <DynamicRoute path="/register" component={Register} guest />
                 <DynamicRoute path="/login" component={Login} guest />
               </Switch>
             </Container>
+            </div>
           </BrowserRouter>
         </MessageProvider>
       </AuthProvider>
