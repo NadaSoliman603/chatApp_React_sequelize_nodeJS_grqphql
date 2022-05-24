@@ -1,21 +1,68 @@
 
+// const { PubSub }  = require('graphql-subscriptions' ) 
+// const jwt = require('jsonwebtoken')
+// const { JWT_SECRET } = require('../config/env.json')
+
+// // module.exports = (context) => {
+// //   if (context.req && context.req.headers.authorization) {
+// //     const token = context.req.headers.authorization.split('Bearer ')[1]
+// //     jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+// //         console.log("decodedToken" , decodedToken)
+// //       context.user = decodedToken
+// //     })
+// //   }
+
+// //   return context
+// // }
+
+
+
+// const pubsub = new PubSub()
+
+// module.exports = (context) => {
+//   let token
+//   if (context.req && context.req.headers.authorization) {
+//     console.log("CCONTEXT_REQ")
+//     token = context.req.headers.authorization.split('Bearer ')[1]
+//   } else if (context.connection && context.connection.context.Authorization) {
+//     console.log("CCONTEXT== SUB" )
+//     token = context.connection.context.Authorization.split('Bearer ')[1]
+//   }
+
+//   if (token) {
+//     console.log("TOKEN_VERIFY" )
+//     jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+//       context.user = decodedToken
+//     })
+//   }
+
+//   context.pubsub = pubsub
+
+//   return context
+// }
+
+
 const jwt = require('jsonwebtoken')
 const { JWT_SECRET } = require('../config/env.json')
+const { PubSub } = require('apollo-server')
+
+const pubsub = new PubSub()
 
 module.exports = (context) => {
+  let token
   if (context.req && context.req.headers.authorization) {
+    token = context.req.headers.authorization.split('Bearer ')[1]
+  } else if (context.connection && context.connection.context.Authorization) {
+    token = context.connection.context.Authorization.split('Bearer ')[1]
+  }
 
-    const token = context.req.headers.authorization.split('Bearer ')[1]
-    console.log(token)
-    console.log("token" , token)
+  if (token) {
     jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
-        console.log("decodedToken" , decodedToken)
       context.user = decodedToken
     })
   }
 
+  context.pubsub = pubsub
+
   return context
 }
-
-// "token  yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFobWFkIiwiaWF0IjoxNjUzMTkwNzkxLCJleHAiOjE2NTMxOTQzOTF9.iUk8bAga7Mc5xBjpXE9e9y81Ue6SfQHwki35PgH6vfo,"
-// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFobWFkIiwiaWF0IjoxNjUzMTkxMTg0LCJleHAiOjE2NTMxOTQ3ODR9.zdaubkLdjwH5g4BS78wlxu9oZ2iqp28ksfG7IVuPtbU"

@@ -1,20 +1,87 @@
 const bcrypt = require('bcryptjs')
-const { UserInputError, AuthenticationError } = require('apollo-server')
+const {
+  UserInputError,
+  AuthenticationError,
+  withFilter,
+} = require('apollo-server')
+
+// const { withFilter } = require('graphql-subscriptions');
+
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
+// const { PubSub } = require('apollo-server')
 
-const { User , Message} = require('../models')
+// const { PubSub } = require('graphql-subscriptions')
+
+const { User, Message } = require('../models')
 const { JWT_SECRET } = require('../config/env.json')
 
+// const pubsub = new PubSub();
+
 module.exports = {
+  // Subscription: {
+  //   newMessage:{   
+  //     subscribe: withFilter(
+  //       function* (_, __, { pubsub, user }) {
+  //         console.log("listn to msg")
+  //         if (!user) throw new AuthenticationError('Unauthenticated')
+  //         return pubsub.asyncIterator(['NEW_MESSAGE'])
+
+  //       }
+  //       ,
+  //       ({ newMessage }, _, { user }) => {
+  //         if (newMessage.from === user.username || newMessage.to === user.username) {
+  //           return true
+  //         } else {
+  //           return false
+  //         }
+  //       }
+  //     )
+  //   },
+
+  //   hello: {
+  //     // Example using an async generator
+  //     subscribe: async function* () {
+  //       console.log("listn to msg")
+  //       for await (const word of ["Hello", "Bonjour", "Ciao"]) {
+  //         yield { hello: word };
+  //       }
+  //     },
+  //   },
+
+
+  // },
+
+
+  Subscription: {
+    newMessage: {
+      subscribe: withFilter(
+        (_, __, { pubsub, user }) => {
+          if (!user) throw new AuthenticationError('Unauthenticated')
+          return pubsub.asyncIterator(['NEW_MESSAGE'])
+        },
+        ({ newMessage }, _, { user }) => {
+          if (
+            newMessage.from === user.username ||
+            newMessage.to === user.username
+          ) {
+            return true
+          }
+
+          return false
+        }
+      ),
+    },
+  },
+
   Message: {
     createdAt: (parent) => parent.createdAt.toISOString(),
   },
   Query: {
-    getUsers: async (_, __, {user}) => {
+    getUsers: async (_, __, { user }) => {
       try {
 
-        if(!user)throw new AuthenticationError("unAuthenticated")
+        if (!user) throw new AuthenticationError("unAuthenticated")
         let users = await User.findAll({
           attributes: ['username', 'imageUrl', 'createdAt'],
           where: { username: { [Op.ne]: user.username } },
@@ -165,7 +232,7 @@ module.exports = {
       }
     },
 
-    sendMessage: async (parent, { to, content }, { user }) => {
+    sendMessage: async (parent, { to, content }, { user , pubsub }) => {
       try {
         if (!user) throw new AuthenticationError('Unauthenticated')
 
@@ -187,12 +254,14 @@ module.exports = {
           content,
         })
 
+        pubsub.publish('NEW_MESSAGE', { newMessage: message })
+
         return message
       } catch (err) {
         console.log(err)
         throw err
       }
     },
-  
+
   },
 }

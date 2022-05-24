@@ -49,7 +49,7 @@ export default function Home({ history }) {
       
       <Row className="bg-white">
       <Header />
-        <Col xs={4} style={{ backgroundColor: "#eee" }}>
+        <Col className='users-box' xs={4} style={{ backgroundColor: "#eee" }}>
           <Users setSelectedUser={setSelectedUser}/>
           </Col>
         <Col xs={10} md={8}  className="messages-box d-flex flex-column-reverse">

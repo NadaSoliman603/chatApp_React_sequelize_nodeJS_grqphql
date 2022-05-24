@@ -1,23 +1,26 @@
+
+
 {
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
   "dependencies": {
-    "apollo-server": "^3.7.0",
+    "apollo-server": "^2.16.1",
     "bcryptjs": "^2.4.3",
-    "graphql": "^16.5.0",
+    "graphql": "^15.3.0",
     "jsonwebtoken": "^8.5.1",
-    "mysql2": "^2.3.3",
-    "sequelize": "^6.19.2"
+    "mysql2": "^2.1.0",
+    "sequelize": "^6.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   },
   "scripts": {
-    "start": "nodemon server.js --ignore client/"
-  },
-  "name": "chateapp",
-  "version": "1.0.0",
-  "main": "server.js",
-  "devDependencies": {
-    "nodemon": "^2.0.16"
+    "dev": "nodemon server.js --ignore client/",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "description": ""
+  "license": "ISC"
 }

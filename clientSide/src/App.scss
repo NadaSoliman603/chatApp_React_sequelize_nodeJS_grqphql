@@ -32,6 +32,16 @@ background-color: #eee;
   }
 }
 
+.users-box {
+  height: 458px;
+  overflow-y: scroll;
+
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
 .user-image {
   width: 50px;
   height: 50px;
