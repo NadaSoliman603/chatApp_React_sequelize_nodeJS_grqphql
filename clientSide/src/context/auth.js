@@ -26,6 +26,7 @@ const authReducer = (state, action) => {
 
         case 'LOGIN':
             // localStorage.setItem('token', action.payload.login.token)
+            console.log("auth Contecxt")
             localStorage.setItem('token', action.payload.token)
             return {
                 ...state,

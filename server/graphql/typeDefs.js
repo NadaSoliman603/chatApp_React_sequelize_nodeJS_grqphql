@@ -14,20 +14,25 @@ module.exports = gql`
  
 
 
-  type Message {
-    uuid: String!
-    content: String!
-    from: String!
-    to: String!
-    createdAt: String!
-  }
+  
 
 type Reaction {
+  uuid: String!
   content: String!
   createdAt: String!
   message: Message!
   user: User!
 }
+
+
+type Message {
+    uuid: String!
+    content: String!
+    from: String!
+    to: String!
+    createdAt: String!
+    reactions:[Reaction]
+  }
 
   type Query {
     getUsers: [User]!

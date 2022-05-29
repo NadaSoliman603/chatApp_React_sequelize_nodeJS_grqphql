@@ -9,7 +9,7 @@ const LOGIN_USER = gql`
     login(username: $username, password: $password) {
       username
       email
-      createdAt
+      # createdAt
       token
     }
   }
@@ -49,7 +49,7 @@ export default function Register(props) {
         <h1 className="text-center">Login</h1>
         <Form onSubmit={submitLoginForm}>
           <Form.Group>
-            <Form.Label className={errors.username && 'text-danger'}>
+            <Form.Label className={errors?.username && 'text-danger'}>
               {errors.username ?? 'Username'}
             </Form.Label>
             <Form.Control
@@ -62,7 +62,7 @@ export default function Register(props) {
             />
           </Form.Group>
           <Form.Group>
-            <Form.Label className={errors.password && 'text-danger'}>
+            <Form.Label className={errors?.password && 'text-danger'}>
               {errors.password ?? 'Password'}
             </Form.Label>
             <Form.Control

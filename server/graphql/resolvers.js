@@ -165,6 +165,7 @@ module.exports = {
             to: { [Op.in]: usernames },
           },
           order: [['createdAt', 'DESC']],
+          include: [{model: Reaction , as :"reactions"}]
         })
 
         return messages
@@ -264,36 +265,26 @@ module.exports = {
       try {
         // validate content
         if (!reactions.includes(content)) throw UserInputError("Invalid Raction")
-        console.log("2")
         //get  User
         const username = user ? user.username : ''
         user = await User.findOne({ where: { username } })
         if (!user) throw new AuthenticationError('Unauthenticated')
-        console.log("3")
         //GET MESSAGE
         const message = await Message.findOne({ where: { uuid } })
         if (!message) throw new UserInputError('message not found')
-        console.log("4")
         //if user has permetion to react this MSG
         if (message.from !== user.username && message.to !== user.username) {
           throw ForbiddenError('Unauthorized')
         }
-
-        console.log("5")
-
-
           let reaction = await Reaction.findOne({
           where: { messageId: message.id, userId: user.id },
         })
-
         if (reaction) {
           //reaction is exsist update it
-          console.log("6")
           reaction.content = content
           await reaction.save()
         } else {
           // reaction dosnt exsist create it
-          console.log("7")
           reaction = await Reaction.create({
             messageId: message.id,
             userId: user.id,
