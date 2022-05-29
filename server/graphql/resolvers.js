@@ -3,6 +3,7 @@ const {
   UserInputError,
   AuthenticationError,
   withFilter,
+  ForbiddenError,
 } = require('apollo-server')
 
 // const { withFilter } = require('graphql-subscriptions');
@@ -13,45 +14,27 @@ const { Op } = require('sequelize')
 
 // const { PubSub } = require('graphql-subscriptions')
 
-const { User, Message } = require('../models')
+const { User, Message , Reaction } = require('../models')
+
 const { JWT_SECRET } = require('../config/env.json')
 
 // const pubsub = new PubSub();
 
 module.exports = {
-  // Subscription: {
-  //   newMessage:{   
-  //     subscribe: withFilter(
-  //       function* (_, __, { pubsub, user }) {
-  //         console.log("listn to msg")
-  //         if (!user) throw new AuthenticationError('Unauthenticated')
-  //         return pubsub.asyncIterator(['NEW_MESSAGE'])
-
-  //       }
-  //       ,
-  //       ({ newMessage }, _, { user }) => {
-  //         if (newMessage.from === user.username || newMessage.to === user.username) {
-  //           return true
-  //         } else {
-  //           return false
-  //         }
-  //       }
-  //     )
-  //   },
-
-  //   hello: {
-  //     // Example using an async generator
-  //     subscribe: async function* () {
-  //       console.log("listn to msg")
-  //       for await (const word of ["Hello", "Bonjour", "Ciao"]) {
-  //         yield { hello: word };
-  //       }
-  //     },
-  //   },
-
-
-  // },
-
+  Message: {
+    createdAt: (parent) => parent.createdAt.toISOString(),
+  },
+  User: {
+    createdAt: (parent) => parent.createdAt.toISOString(),
+  },
+  Reaction: {
+    createdAt: (parent) => parent.createdAt.toISOString(),
+    Message: async (parent) => await Message.findByPk(parent.messageId),
+    User: async (parent) =>
+      await User.findByPk(parent.userId, {
+        attributes: ['username', 'imageUrl', 'createdAt'],
+      }),
+  },
 
   Subscription: {
     newMessage: {
@@ -72,10 +55,23 @@ module.exports = {
         }
       ),
     },
-  },
 
-  Message: {
-    createdAt: (parent) => parent.createdAt.toISOString(),
+    newReaction: {
+      subscribe: withFilter(
+        (_, __, { pubsub, user }) => {
+          if (!user) throw new AuthenticationError('Unauthenticated')
+          return pubsub.asyncIterator(['NEW_REACTION'])
+        },
+       async ({ newReaction }, _, { user }) => {
+          
+          const message = await newReaction.getMessage()
+          if (message.from === user.username || message.to === user.username){
+            return true
+          }
+          return false
+        }
+      ),
+    },
   },
   Query: {
     getUsers: async (_, __, { user }) => {
@@ -232,7 +228,7 @@ module.exports = {
       }
     },
 
-    sendMessage: async (parent, { to, content }, { user , pubsub }) => {
+    sendMessage: async (parent, { to, content }, { user, pubsub }) => {
       try {
         if (!user) throw new AuthenticationError('Unauthenticated')
 
@@ -262,6 +258,57 @@ module.exports = {
         throw err
       }
     },
+    reactToMessage: async (_, { uuid, content }, { user , pubsub }) => {
+      const reactions = ['❤️', '😆', '😯', '😢', '😡', '👍', '👎']
+      console.log("1")
+      try {
+        // validate content
+        if (!reactions.includes(content)) throw UserInputError("Invalid Raction")
+        console.log("2")
+        //get  User
+        const username = user ? user.username : ''
+        user = await User.findOne({ where: { username } })
+        if (!user) throw new AuthenticationError('Unauthenticated')
+        console.log("3")
+        //GET MESSAGE
+        const message = await Message.findOne({ where: { uuid } })
+        if (!message) throw new UserInputError('message not found')
+        console.log("4")
+        //if user has permetion to react this MSG
+        if (message.from !== user.username && message.to !== user.username) {
+          throw ForbiddenError('Unauthorized')
+        }
 
+        console.log("5")
+
+
+          let reaction = await Reaction.findOne({
+          where: { messageId: message.id, userId: user.id },
+        })
+
+        if (reaction) {
+          //reaction is exsist update it
+          console.log("6")
+          reaction.content = content
+          await reaction.save()
+        } else {
+          // reaction dosnt exsist create it
+          console.log("7")
+          reaction = await Reaction.create({
+            messageId: message.id,
+            userId: user.id,
+            content,
+          })
+        }
+
+        pubsub.publish('NEW_REACTION', { newReaction: reaction })
+        
+        console.log("reaction" , reaction)
+        return  reaction
+
+      } catch (error) {
+        console.log(error)
+      }
+    }
   },
 }
