@@ -1,6 +1,6 @@
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { Fragment, useEffect, useState } from "react";
-import { Form, Image } from "react-bootstrap";
+import { Form, } from "react-bootstrap";
 import { useMessageDispatch, useMessageState } from "../../context/messages";
 import Message from "./Message";
 
@@ -33,10 +33,10 @@ const GET_MESSAGES = gql`
 function Messages() {
   const { users } = useMessageState()
   const dispatch = useMessageDispatch()
-  const selectedUser = users?.find((u) => u.selected === true)
   const [content,setContent] = useState("")
+  const selectedUser = users?.find((u) => u.selected === true)
 
-  
+
   const [sendMessage] = useMutation(SEND_MESSAGE, {
     onError: (err) => console.log(err),
   })
@@ -47,7 +47,6 @@ const submitMessage = (e)=>{
   if (content.trim() === '' || !selectedUser) return
   setContent('')
   sendMessage({ variables: { to: selectedUser.username, content } })
-
 }
   const [
     getMessages,
@@ -79,11 +78,10 @@ const submitMessage = (e)=>{
 
  
   let messages  = []
-  if(messagesData && messagesData.getMessages.length > 0){
-    messages =  Object.keys(messagesData.getMessages).sort().reverse().map(key=> ({
-    ...messagesData.getMessages[key]
-   }) );
+  if(selectedUser && selectedUser?.messages?.length > 0){
+    messages =  Object.keys(selectedUser?.messages).sort().reverse().map(key=> ({...selectedUser?.messages[key] }) );
   }
+
 
  
 

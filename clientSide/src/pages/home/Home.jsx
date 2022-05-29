@@ -1,36 +1,20 @@
-import React, { Fragment, useEffect, useState } from 'react'
-import { Row, Col, Button, Image, Navbar, Nav } from 'react-bootstrap'
+import React, { Fragment, useEffect } from 'react'
+import { Row, Col,} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import { gql, useLazyQuery, useQuery } from '@apollo/client'
+import { gql,useSubscription } from '@apollo/client'
 
-import { useAuthDispatch } from '../../context/auth'
-import { Container } from 'react-bootstrap';
+import {  useAuthState } from '../../context/auth'
 import Header from './Header'
 import Messages from './Messages'
 import Users from './Users'
-
-const GET_USERS = gql`
-  query getUsers {
-    getUsers {
-      username
-      createdAt
-      imageUrl
-      latestMessage {
-        uuid
-        from
-        to
-        content
-        createdAt
-      }
-    }
-  }
-`
+import { useMessageDispatch } from './../../context/messages';
 
 
 
-const GET_MESSAGES = gql`
-  query getMessages($from: String!) {
-    getMessages(from: $from) {
+
+const NEW_MESSAGE = gql`
+  subscription newMessage {
+    newMessage {
       uuid
       from
       to
@@ -40,20 +24,44 @@ const GET_MESSAGES = gql`
   }
 `
 
-export default function Home({ history }) {
-  const [selectedUser, setSelectedUser] = useState(null)
 
+
+export default function Home({ history }) {
+
+  const { data: messageData, error: messageError } = useSubscription(  NEW_MESSAGE)
+  const messageDispatch = useMessageDispatch()
+  const { user } = useAuthState()
+
+
+  
+  useEffect(() => {
+    if (messageError) console.log(messageError)
+    if (messageData) {
+      const message = messageData.newMessage
+      const otherUser = user.username === message.to ? message.from : message.to
+      
+      console.log("message" , message  )
+      console.log("otherUser" , otherUser  )
+  
+      messageDispatch({
+        type: 'ADD_MESSAGE',
+        payload: {
+          username: otherUser,
+          message,
+        },
+      })
+    }
+  }, [messageError, messageData])
 
   return (
     <Fragment>
-      
       <Row className="bg-white">
-      <Header />
+        <Header />
         <Col className='users-box' xs={4} style={{ backgroundColor: "#eee" }}>
-          <Users setSelectedUser={setSelectedUser}/>
-          </Col>
-        <Col xs={10} md={8}  className="messages-box d-flex flex-column-reverse">
-          <Messages selectedUser={selectedUser}/>
+          <Users  />
+        </Col>
+        <Col xs={10} md={8} className="messages-box d-flex flex-column-reverse">
+          <Messages  />
         </Col>
       </Row>
     </Fragment>

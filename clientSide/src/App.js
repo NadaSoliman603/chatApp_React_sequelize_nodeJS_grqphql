@@ -20,6 +20,7 @@ function App() {
           <BrowserRouter>
           <div style={{background:"rgb(0 0 0 / 80%)" , height:"625px"}}>
             <Container className="pt-5 " >
+              {/* <1>hi</1> */}
               <Switch>
                 <DynamicRoute exact path="/" component={Home} authenticated />
                 <DynamicRoute path="/register" component={Register} guest />
